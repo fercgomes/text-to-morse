@@ -1,5 +1,4 @@
 /* Implementacao de ABP */
-#include <stdio.h>
 #include <stdlib.h>
 
 typedef struct treeNode tNode;
