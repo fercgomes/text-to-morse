@@ -43,3 +43,12 @@ tNode* BST_insert(tNode* root, int ascii, char* morseCode){
 		else return root->right = BST_insert(root, ascii, morseCode);
 	}
 }
+
+void BST_prefixado(tNode* root){
+	if(root){
+		BST_prefixado(root->left);
+		BST_prefixado(root->right);
+		printf("Ascii: %d, Morse: %s", root->ascii, root->morseCode);
+
+	}
+}
