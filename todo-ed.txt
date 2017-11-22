@@ -17,4 +17,6 @@ Contador de comparacoes para analise de desempenho.
 TODOs:
 	1. Escolher segunda versao de Arvore.
 	2. Implementar ABP (abp.c abp.h)
-	3. Implementar Arv2 (arv2.c arv.h) 
+	3. Implementar Arv2 (arv2.c arv.h)
+	4. Implementar Construtor
+	5. Implementar algoritmo de conversao 
