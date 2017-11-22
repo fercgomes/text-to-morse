@@ -1,0 +1,20 @@
+Trabalho Final ED
+
+Conveter um arquivo de texto para codigo Morse.
+
+Tabela de conversao armazenada em uma arvore.
+Duas versoes:
+	1. ABP
+	2. AVL, RB ou SPLAY
+
+Case insensitive.
+Caracteres acentuados convertidos para versao sem acento.
+Ignorar caracteres que nao constem na tabela.
+"/" separador de palavras.
+
+Contador de comparacoes para analise de desempenho.
+
+TODOs:
+	1. Escolher segunda versao de Arvore.
+	2. Implementar ABP (abp.c abp.h)
+	3. Implementar Arv2 (arv2.c arv.h) 
