@@ -1,6 +1,7 @@
 /* Implementacao de ABP */
-#include <stdio.h>
 #include <stdlib.h>
+
+
 
 typedef struct treeNode tNode;
 struct treeNode {
@@ -38,9 +39,20 @@ tNode* BST_insert(tNode* root, int ascii, char* morseCode){
 		new = (tNode*)malloc(sizeof(tNode));
 		new->ascii = ascii;
 		new->morseCode = morseCode;
+		new->left = NULL;
+		new->right = NULL;
 		return new;
 	} else {
-		if(ascii < root->ascii) return root->right = BST_insert(root, ascii, morseCode);
-		else return root->right = BST_insert(root, ascii, morseCode);
+		if(ascii < root->ascii) root->left = BST_insert(root->left, ascii, morseCode);
+		else if(ascii > root->ascii) root->right = BST_insert(root->right, ascii, morseCode);
+		return root;
+	}
+}
+
+void BST_prefixado(tNode* root){
+	if(root){
+		printf("Ascii: %d, Morse: %s\n", root->ascii, root->morseCode);
+		BST_prefixado(root->left);
+		BST_prefixado(root->right);
 	}
 }
