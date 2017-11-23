@@ -18,11 +18,11 @@ struct treeNode {
 	tNode* right;
 };
 
-tNode* BST_create(){
+tNode* TREE_create(){
 	return NULL;
 }
 
-tNode* BST_delete(tNode* root){
+tNode* TREE_delete(tNode* root){
 	if(root){
 		BST_delete(root->left);
 		BST_delete(root->right);
@@ -33,14 +33,48 @@ tNode* BST_delete(tNode* root){
 }
 
 /* Retorna o ASCII, caso encontrar. Retorna NULL se nao encontrar. */
-char* BST_search(tNode* root, int key){
+char* TREE_search(tNode* root, int key){
 	if(root){
 		if(root->ascii == key) return root->morseCode;
-		else if(key < root->ascii) return BST_search(root->left, key);
-		else return BST_search(root->right, key);			
+		else if(key < root->ascii) return TREE_search(root->left, key);
+		else return TREE_search(root->right, key);			
 	} else return NULL;
 }
 
+/* Calcula fator de uma arvore */
+int TREE_height(tNode *a)
+{
+	int leftHeight, rightHeight;
+	if (a == NULL)
+		return 0;
+	else{
+		leftHeight = TREE_height(a->left);
+		rightHeight = TREE_height(a->right);
+		if (leftHeight > rightHeight)
+			return (1 + leftHeight);
+		else
+			return (1 + rightHeight);
+	}
+}
+
+int TREE_factor(tNode *a){
+	return(TREE_height(a->left) - TREE_height(a->right));
+}
+
+void Desenha(tNode *a , int nivel){
+	int x;
+
+	if (a !=NULL){
+		for (x=1; x<=nivel; x++)
+			printf("=");
+		printf("%s FB= %d - ASCII: %d\n", a->morseCode, BST_factor(a), a->ascii);
+		if (a->left != NULL) Desenha(a->left, (nivel+1));
+		if (a->right != NULL) Desenha(a->right, (nivel+1));
+	}
+}
+
+
+/* Funcao exclusiva para implementacao ABP */
 tNode* BST_insert(tNode* root, int ascii, char* morseCode){
 	tNode* new;
 	if(!root){
@@ -58,47 +92,6 @@ tNode* BST_insert(tNode* root, int ascii, char* morseCode){
 			root->right = BST_insert(root->right, ascii, morseCode);
 		}
 		return root;
-	}
-}
-
-void BST_prefixado(tNode* root){
-	if(root){
-	//	printf("Ascii: %d, Morse: %s \n", root->ascii, root->morseCode);
-		BST_prefixado(root->left);
-		BST_prefixado(root->right);
-		printf("Ascii: %d, Morse: %s \n", root->ascii, root->morseCode);
-	}
-}
-
-int Altura (tNode *a)
-{
-    int Alt_Esq, Alt_Dir;
-    if (a == NULL)
-      return 0;
-    else
-    {
-       Alt_Esq = Altura (a->left);
-       Alt_Dir = Altura (a->right);
-       if (Alt_Esq > Alt_Dir)
-         return (1 + Alt_Esq);
-       else
-         return (1 + Alt_Dir);
-     }
-}
-
-int Calcula_FB(tNode *a){
-	return (Altura(a->left) - Altura(a->right));
-}
-
-void Desenha(tNode *a , int nivel){
-	int x;
-
-	if (a !=NULL){
-		for (x=1; x<=nivel; x++)
-			printf("=");
-		printf("%s FB= %d - ASCII: %d\n", a->morseCode, Calcula_FB(a), a->ascii);
-		if (a->left != NULL) Desenha(a->left, (nivel+1));
-		if (a->right != NULL) Desenha(a->right, (nivel+1));
 	}
 }
 
@@ -138,6 +131,7 @@ tNode* BST_constructor(const char* filename){
 			strcpy(string_alloc, word);	
 
 			/* Insere caracter na arvore */
+			/* DECISAO: Constroi na ABP ou AVL */
 			newTree = BST_insert(newTree, _ascii, string_alloc); 	
 		}	
 		fclose(table);
@@ -162,7 +156,8 @@ int main(int argc, char *argv[]){
 
 	char *morse_found;
 	char separador[]= {" 0123456789,.&*%\?!;/-'@\"$#=><()][}{:\n\t"};
-
+	
+	/* Decidir qual implementacao */
 	tNode* morseTable = BST_constructor("TabelaMorse.txt");
 
 	if (argc!=3){
