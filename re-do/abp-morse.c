@@ -3,8 +3,12 @@
 #include <string.h>
 #include <locale.h>
 #include <ctype.h>
+#include <locale.h>
+#include <time.h>
 
 #define BUFFERSIZE 256
+#define BUFFER_SIZE 256 
+#define MORSEWORD 256 
 
 typedef struct treeNode tNode;
 struct treeNode {
@@ -104,8 +108,8 @@ tNode* BST_constructor(const char* filename){
 	FILE* table;
 	char line[BUFFERSIZE];
 	char *word, *string_alloc;
+	char *temp;
 	
-	char* _morsecode;
 	int _ascii, i;
 
 	tNode* newTree = BST_create();
@@ -123,11 +127,17 @@ tNode* BST_constructor(const char* filename){
 			_ascii = word[0]; 		// Usa os maiusculos.
 
 			/* Segundo token: codigo morse */
-			word = strtok(NULL, "\t");
+			word = strtok(NULL, "\n");
+
+			// Busca CR na string
+			temp = strchr(word, 13);
+			if(temp) *temp = 0; // Apaga o CR.
+
+			/* Aloca espaco para string */
 			string_alloc = (char*)malloc(10*sizeof(char));
 			strcpy(string_alloc, word);	
-			_morsecode = word;
-			
+
+			/* Insere caracter na arvore */
 			newTree = BST_insert(newTree, _ascii, string_alloc); 	
 		}	
 		fclose(table);
@@ -138,14 +148,57 @@ tNode* BST_constructor(const char* filename){
 /* Para teste das funcoes */
 
 int main(int argc, char *argv[]){
-	setlocale(LC_ALL,"");
-	tNode* new;
-	printf("%s\n", argv[1]);
-	new = BST_constructor(argv[1]);
-		if(new == NULL) printf("\nArvore vazia.\n");
-	else BST_prefixado(new);
-	//Desenha(new, 10);	
+	setlocale(LC_ALL,""); //para imprimir corretamente na tela os caracteres acentuados
+	clock_t start, end, elapsed; //para contar o tempo
 
-	BST_delete(new);
+	FILE * entrada;
+	FILE * saida;
+
+	int i, char_ascii;
+
+	char *palavra,
+             linha[BUFFERSIZE],
+             inMorse_word[MORSEWORD]; // linhas a serem lidas do arquivo
+
+	char *morse_found;
+	char separador[]= {" 0123456789,.&*%\?!;/-'@\"$#=><()][}{:\n\t"};
+
+	tNode* morseTable = BST_constructor("TabelaMorse.txt");
+
+	if (argc!=3){
+		printf ("Número incorreto de parâmetros.\n Para chamar o programa digite: exemplo <arq_entrada> <arq_saida>\n");
+		return 1;
+	} else {
+		entrada = fopen (argv[1], "r"); // abre o arquivo para leitura -- argv[1] é o primeiro parâmetro após o nome do arquivo.
+		if (entrada == NULL){
+			printf ("Erro ao abrir o arquivo %s",argv[1]);
+			return 1;
+		} else {
+			saida = fopen (argv[2], "w"); // abre o arquivo para saida -- argv[2] é o segundo parâmetro após o nome do arquivo.
+			start=clock(); //inicia a contagem do tempo;
+			//percorre todo o arquivo lendo linha por linha
+			while(fgets(linha,BUFFERSIZE,entrada)){
+				palavra = strtok(linha, separador);
+				while(palavra != NULL){
+					/* Recebe palavra */
+					for(i = 0; palavra[i] != '\0'; i++){
+						char_ascii = (int)toupper(palavra[i]);
+						morse_found = BST_search(morseTable, char_ascii);
+						if(morse_found) fprintf(saida, "%s ", morse_found);
+					}	
+					fprintf(saida, "/ ");
+					/* Gera nova palavra */
+					palavra = strtok(NULL, separador);
+				}
+			}
+			end=clock(); //lê o tempo final
+			elapsed = 1000 * (end - start) / (CLOCKS_PER_SEC); //calcula o tempo decorrido em milissegundos
+			printf("\nO tempo gasto no processamento do arquivo %s foi de %ld ms\n",argv[1],elapsed);
+			printf("\nArquivo %s gerado com sucesso.\n",argv[2]);
+		}
+		fclose (entrada); //fecha os arquivos
+		fclose (saida);
+		return 0;
+	}
 	return 0;
 }
