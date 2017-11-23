@@ -22,6 +22,7 @@ tNode* BST_delete(tNode* root){
 	if(root){
 		BST_delete(root->left);
 		BST_delete(root->right);
+		free(root->morseCode);
 		free(root);
 	}
 	return NULL;
@@ -47,14 +48,11 @@ tNode* BST_insert(tNode* root, int ascii, char* morseCode){
 		return new;
 	} else {
 		if(ascii < root->ascii) {
-			printf("Chamou recursao para ascii %d e morse %s\n", ascii, morseCode);
 			root->left = BST_insert(root->left, ascii, morseCode);
 		}
 		else if(ascii > root->ascii){
-			printf("Chamou recursao para ascii %d e morse %s\n", ascii, morseCode);
 			root->right = BST_insert(root->right, ascii, morseCode);
 		}
-		printf("root ascii: %d morse: %s", root->ascii, root->morseCode);
 		return root;
 	}
 }
@@ -105,7 +103,7 @@ void Desenha(tNode *a , int nivel){
 tNode* BST_constructor(const char* filename){
 	FILE* table;
 	char line[BUFFERSIZE];
-	char* word; 
+	char *word, *string_alloc;
 	
 	char* _morsecode;
 	int _ascii, i;
@@ -123,16 +121,15 @@ tNode* BST_constructor(const char* filename){
 			/* Primeiro token: ascii */
 			word = strtok(line, "\t");
 			_ascii = word[0]; 		// Usa os maiusculos.
-			printf("ASCII: %d - ", _ascii);	
 
 			/* Segundo token: codigo morse */
 			word = strtok(NULL, "\t");
+			string_alloc = (char*)malloc(10*sizeof(char));
+			strcpy(string_alloc, word);	
 			_morsecode = word;
-			printf("Codigo: %s", _morsecode);
 			
-			newTree = BST_insert(newTree, _ascii, _morsecode); 	
+			newTree = BST_insert(newTree, _ascii, string_alloc); 	
 		}	
-		printf("\n------ fim da construcao da arvore -------\n");
 		fclose(table);
 		return newTree;
 	}
@@ -145,9 +142,9 @@ int main(int argc, char *argv[]){
 	tNode* new;
 	printf("%s\n", argv[1]);
 	new = BST_constructor(argv[1]);
-	//if(new == NULL) printf("\nArvore vazia.\n");
-	//else BST_prefixado(new);
-	Desenha(new, 10);	
+		if(new == NULL) printf("\nArvore vazia.\n");
+	else BST_prefixado(new);
+	//Desenha(new, 10);	
 
 	BST_delete(new);
 	return 0;
