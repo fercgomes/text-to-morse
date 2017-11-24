@@ -18,6 +18,7 @@ typedef struct treeNode tNode;
 struct treeNode {
 	char* morseCode;
 	int ascii;
+	int factor;
 	tNode* left;
 	tNode* right;
 };
@@ -172,7 +173,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 				A funcao insere depende da implementacao
 				escolhida.
 			*/
-			newTree = insert(newTree, ascii, string_alloc); 	
+			newTree = insert(newTree, ascii, string_alloc);	
 		}	
 		fclose(table);
 		return newTree;
@@ -259,9 +260,8 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 int main(int argc, char *argv[]){
 	setlocale(LC_ALL,""); 
-	
 	if(argc != 4){
 		printf("* Numero incorreto de argumentos.\nUSO: <programa> tabelamorse.txt entrada.txt saida.txt\n");
 		return 1;
-	} else txtToMorse(argv[1], argv[2], argv[3], ABP);
+	} else txtToMorse(argv[1], argv[2], argv[3], AVL);
 }
