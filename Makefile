@@ -1,4 +1,4 @@
 all:
-	gcc abp-morse.c -o abpmorse
+	gcc txtToMorse.c -o txtToMorse
 clean:
-	rm abpmorse
+	rm txtToMorse
