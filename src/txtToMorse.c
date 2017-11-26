@@ -1,3 +1,13 @@
+/*
+	CONVERSOR DE TEXTO PARA CODIGO MORSE
+	TRABALHO FINAL DA DISCIPLINA DE ESTRUTURA DE DADOS
+	AUTORES:
+		Fernando Correa Gomes (00274317)
+		Daniel Novaes
+
+	UFRGS 2017
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,113 +16,14 @@
 #include <locale.h>
 #include <time.h>
 
+#include "bst.h"
+
 #define BUFFERSIZE 256
 #define MORSEMAX 10
 
 /* Para escolha de implementacao */
 #define ABP 0 
 #define AVL 1
-
-/* TAD: Arvore Binaria de Pesquisa */
-typedef struct treeNode tNode;
-struct treeNode {
-	char* morseCode;
-	int ascii;
-	int factor;
-	tNode* left;
-	tNode* right;
-};
-
-//#include "draw.c"
-
-/* Contador de comparacoes na funcao de consulta */
-static int search_count = 0;
-/* Contador de letras convertidas */
-static int char_count = 0;
-
-/* Inicializa uma ABP */
-tNode* BST_create(){
-	return NULL;
-}
-
-/* Desaloca uma ABP */
-tNode* BST_delete(tNode* root){
-	if(root){
-		BST_delete(root->left);
-		BST_delete(root->right);
-		free(root->morseCode);
-		free(root);
-	}
-	return NULL;
-}
-
-/* Retorna a string que contem o codigo Morse, caso encontrar. Retorna NULL se nao encontrar. */
-char* BST_search(tNode* root, int key){
-	if(root){
-		if(root->ascii == key){
-			search_count++;
-			return root->morseCode;
-		}
-		else if(key < root->ascii){
-			search_count++;
-			return BST_search(root->left, key);
-		}
-		else return BST_search(root->right, key);			
-	} else return NULL;
-}
-
-/* Calcula a altura de uma arvore */
-int BST_height(tNode *a){
-	int leftHeight, rightHeight;
-	if (a == NULL) return 0;
-	else {
-		leftHeight = BST_height(a->left);
-		rightHeight = BST_height(a->right);
-		if(leftHeight > rightHeight) return (1 + leftHeight);
-		else return (1 + rightHeight);
-	}
-}
-
-int BST_factor(tNode *a){
-	return(BST_height(a->left) - BST_height(a->right));
-}
-
-/* Retorna se a arvore eh AVL */
-int isAVL(tNode* root){
-	int leftHeight, rightHeight;
-	if(root){
-		/* Calcula altura da subarvore esquerda */
-		leftHeight = BST_height(root->left);
-		/* Calcula altura da subarvore direita */
-		rightHeight = BST_height(root->right);
-
-		/* Condicao para ser AVL:
-		   Modulo da diferenca entre altura da subarvore esquerda e direita
-		   tem que ser menor que 2, e subarvore esquerda direita tambem
-		   tem que ser AVL. */
-		return ((leftHeight - rightHeight < 2) &&
-			(rightHeight - leftHeight < 2) &&
-			isAVL(root->left) &&
-			isAVL(root->right));
-	} else return 1;
-}
-
-/* Insere um nodo em uma ABP, segundo os criterios de uma ABP */
-tNode* BST_insert(tNode* root, int ascii, char* morseCode){
-	tNode* new;
-	if(!root){
-		new = (tNode*)malloc(sizeof(tNode));
-		new->ascii = ascii;
-		new->morseCode = morseCode;
-		new->left = NULL;
-		new->right = NULL;
-		return new;
-	} else {
-		if(ascii < root->ascii) root->left = BST_insert(root->left, ascii, morseCode);
-		else if(ascii > root->ascii) root->right = BST_insert(root->right, ascii, morseCode);
-		return root;
-	}
-}
 
 /* Constroi uma ABP ou AVL com a tabela Morse */
 tNode* tree_constructor(const char* filename, int implem_flag){
@@ -135,11 +46,10 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 
 	table = fopen(filename, "r");  
 	if(table == NULL){
-		printf("Erro ao abrir o arquivo %s.", filename);
+		fprintf(stderr, "Erro ao abrir o arquivo %s.", filename);
 		return NULL; // Retorna uma arvore vazia
 	} else {
 		/* Abriu o arquivo com a tabela morse */
-
 		/* Busca uma linha de texto */
 		while(fgets(line, BUFFERSIZE, table)){
 			/* Primeiro token: ascii */
@@ -184,31 +94,37 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 		     AVL (Implementacao em AVL)	[1]
    Retorna 1 em caso de erro e 0 em caso de sucesso . */
 int txtToMorse(const char* morsetable, const char* input_file, const char* output_file, int implem_flag){
-	clock_t start, end, elapsed; //para contar o tempo
+	/* Contagem de tempo */
+	clock_t start, end, elapsed;
 
 	FILE *input_stream, *output_stream;
 
 	int i, char_ascii;
+	/* Contadores de comparacoes e caracteres convertidos */
+	int search_count = 0, char_count = 0;
 
 	char *word,
-             line[BUFFERSIZE],
+         line[BUFFERSIZE],
 	     *morse_found,
 	     delimiters[] = {" 0123456789,.&*%\?!;/-'@\"$#=><()][}{:\r\n\t"};
 
 	/* Decidir qual implementacao */
 	tNode* morseTable = tree_constructor("TabelaMorse.txt", implem_flag);
 	
+	/* Abre arquivo com texto a ser traduzido */
 	input_stream = fopen(input_file, "r");
 	if (input_stream == NULL){
-		printf ("Erro ao abrir o arquivo %s", input_file);
+		fprintf(stderr, "Erro ao abrir o arquivo %s", input_file);
 		return 1;
 	} else {
+		/* Abre arquivo destino */	
 		output_stream = fopen(output_file, "w");
 		if(!output_stream){
-			printf("Erro ao abrir o arquivo %s.\n", output_file);
+			fprintf(stderr, "Erro ao abrir o arquivo %s.\n", output_file);
 			fclose(input_stream);
 			return 1;
-		} else { /* TODO: jogar pra dentro do else e retornar 0 */ 
+		} else {
+			/* Inicia leitura do arquivo */ 
 			start = clock();
 			/* Busca linha de texto */
 			while(fgets(line, BUFFERSIZE, input_stream)){
@@ -222,7 +138,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 						char_ascii = (int)toupper(word[i]);
 						/* Busca o ponteiro para a string que contem o codigo Morse
 						   para a letra informada */
-						morse_found = BST_search(morseTable, char_ascii);
+						morse_found = BST_search(morseTable, char_ascii, &search_count);
 						if(morse_found){
 							char_count++;
 							fprintf(output_stream, "%s ", morse_found);
@@ -237,18 +153,21 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 			end = clock();
 			elapsed = 1000 * (end - start) / (CLOCKS_PER_SEC);
 			/* Imprimir comparacoes */
-			printf("*-------RELATORIO-------*\n");
-			printf("* Implementacao utilizada: ");
+			printf("+--------------------------------------------------------------------------------+\n");
+			printf(">> Convertendo %s...\n", input_file);
+			printf(">> Arquivo %s gerado com sucesso.\n", output_file);
+			printf("+--------------------------------------------------------------------------------+\n");
+			printf("* Implementacao utilizada:\t\t\t");
 			if(implem_flag) printf("AVL\n");
 			else printf("ABP\n");
-			printf("* Teste para AVL: ");
+			printf("* Teste para AVL:\t\t\t\t");
 			if(isAVL(morseTable)) printf("TRUE\n");
 			else printf("FALSE\n");
-			printf("* Altura da arvore utilizada: %d\n", BST_height(morseTable));
-			printf("* Comparacoes realizadas em consultas: %d\n", search_count);
-			printf("* Caracteres convertidos para Morse: %d\n", char_count);
-			printf("* O tempo gasto no processamento do arquivo %s foi de %ld ms\n", input_file, elapsed);
-			printf("* Arquivo %s gerado com sucesso.\n", output_file);
+			printf("* Altura da arvore utilizada:\t\t\t%d\n", BST_height(morseTable));
+			printf("* Comparacoes realizadas em consultas:\t\t%d\n", search_count);
+			printf("* Caracteres convertidos para Morse:\t\t%d\n", char_count);
+			printf("* Tempo gasto no processamento:\t\t\t%ld ms\n", elapsed);
+			printf("+--------------------------------------------------------------------------------+\n");
 		}
 	}
 	BST_delete(morseTable);
@@ -260,7 +179,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 int main(int argc, char *argv[]){
 	setlocale(LC_ALL,""); 
 	if(argc != 4){
-		printf("* Numero incorreto de argumentos.\nUSO: <programa> tabelamorse.txt entrada.txt saida.txt\n");
+		fprintf(stderr, "* Numero incorreto de argumentos.\nUSO: <programa> tabelamorse.txt entrada.txt saida.txt\n");
 		return 1;
-	} else txtToMorse(argv[1], argv[2], argv[3], AVL);
+	} else return txtToMorse(argv[1], argv[2], argv[3], ABP);
 }
