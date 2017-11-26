@@ -121,6 +121,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 	char *word, *string_alloc, *temp;
 	
 	int ascii, i;
+	size_t morse_size;
 	
 	/* Ponteiro para funcao que insere elementos na arvore */
 	tNode* (*insert) (tNode*, int, char*);
@@ -154,7 +155,15 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 				codigo Morse fica alocado independentemente 
 				e nao depende da alocacao da arvore em si.
 			*/
-			string_alloc = (char*)malloc(MORSEMAX * sizeof(char));
+			
+			/* Calcula tamanho necessario para string com o codigo Morse.
+			   Caso a funcao nao retorne um valor valido, usa MORSEMAX como
+			   default. Adiciona espaco para \0 tambem.*/
+			morse_size = strlen(word);
+			if(!morse_size) morse_size = MORSEMAX;
+			else morse_size++;
+
+			string_alloc = (char*)malloc(morse_size * sizeof(char));
 			strcpy(string_alloc, word);	
 	
 			/* Insere caracter na arvore */
