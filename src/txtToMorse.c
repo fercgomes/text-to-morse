@@ -65,7 +65,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 				codigo Morse fica alocado independentemente 
 				e nao depende da alocacao da arvore em si.
 			*/
-			
+
 			/* Calcula tamanho necessario para string com o codigo Morse.
 			   Caso a funcao nao retorne um valor valido, usa MORSEMAX como
 			   default. Adiciona espaco para \0 tambem.*/
@@ -134,8 +134,10 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 					/* Recebe palavra */
 					/* Percorre cada letra da palavra e imprime no arquivo o codigo Morse */
 					for(i = 0; word[i] != '\0'; i++){
-						/* Converte cada ASCII para maiusculo */
-						char_ascii = (int)toupper(word[i]);
+						/* Converte ASCII para maiusculo */
+						if(word[i] >= 97 && word[i] <= 122)
+							char_ascii = (int)toupper(word[i]);
+						else char_ascii = (int)word[i];
 						/* Busca o ponteiro para a string que contem o codigo Morse
 						   para a letra informada */
 						morse_found = BST_search(morseTable, char_ascii, &search_count);
