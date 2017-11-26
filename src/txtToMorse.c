@@ -3,7 +3,7 @@
 	TRABALHO FINAL DA DISCIPLINA DE ESTRUTURA DE DADOS
 	AUTORES:
 		Fernando Correa Gomes (00274317)
-		Daniel Novaes
+		Daniel de Souza Novaes (00290193)
 
 	UFRGS 2017
 */
