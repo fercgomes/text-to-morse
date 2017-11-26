@@ -23,6 +23,8 @@ struct treeNode {
 	tNode* right;
 };
 
+//#include "draw.c"
+
 /* Contador de comparacoes na funcao de consulta */
 static int search_count = 0;
 /* Contador de letras convertidas */
@@ -94,19 +96,6 @@ int isAVL(tNode* root){
 			isAVL(root->right));
 	} else return 1;
 }
-
-void Desenha(tNode *a , int nivel){
-	int x;
-
-	if (a !=NULL){
-		for (x=1; x<=nivel; x++)
-			printf("=");
-		printf("%s FB= %d - ASCII: %d\n", a->morseCode, BST_factor(a), a->ascii);
-		if (a->left != NULL) Desenha(a->left, (nivel+1));
-		if (a->right != NULL) Desenha(a->right, (nivel+1));
-	}
-}
-
 
 /* Insere um nodo em uma ABP, segundo os criterios de uma ABP */
 tNode* BST_insert(tNode* root, int ascii, char* morseCode){
@@ -253,6 +242,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 			printf("* Arquivo %s gerado com sucesso.\n", output_file);
 		}
 	}
+	BST_delete(morseTable);
 	fclose(input_stream);
 	fclose(output_stream);
 	return 0;
