@@ -25,6 +25,13 @@
 #define ABP 0 
 #define AVL 1
 
+/* Converte caracteres para maiusculo */
+int generateUpperAscii(int code){
+	/* Converte a - z para A - Z */
+	if(code >= 97 && code <= 122) return toupper(code);
+	else return code;
+}
+
 /* Constroi uma ABP ou AVL com a tabela Morse */
 tNode* tree_constructor(const char* filename, int implem_flag){
 	FILE* table;
@@ -99,6 +106,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 	FILE *input_stream, *output_stream;
 
+	
 	int i, char_ascii;
 	/* Contadores de comparacoes e caracteres convertidos */
 	int search_count = 0, char_count = 0;
@@ -134,10 +142,11 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 					/* Recebe palavra */
 					/* Percorre cada letra da palavra e imprime no arquivo o codigo Morse */
 					for(i = 0; word[i] != '\0'; i++){
-						/* Converte ASCII para maiusculo */
-						if(word[i] >= 97 && word[i] <= 122)
-							char_ascii = (int)toupper(word[i]);
-						else char_ascii = (int)word[i];
+
+						/* TODO: FUNCAO ASCII */
+						char_ascii = generateUpperAscii(word[i]);
+						printf("Convertendo de %d(%c) para %d(%c).\n", word[i], word[i], char_ascii, char_ascii);
+
 						/* Busca o ponteiro para a string que contem o codigo Morse
 						   para a letra informada */
 						morse_found = BST_search(morseTable, char_ascii, &search_count);
