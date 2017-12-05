@@ -12,23 +12,18 @@ void splayDelete(tNode* root) {
   }
 }
 
-tNode* rightRotation(tNode* node) {
-  
-  node->parent->leftChild = node->rightChild;
-  node->rightChild->parent = node->parent;
-  node->rightChild = node->parent;
-  node->parent = node->rightChild->parent;
-  node->rightChild->parent = node;
-  return node;
+tNode* rightRotation(tNode* root) {
+  tNode* aux = root->leftChild;
+  root->leftChild = aux->rightChild;
+  aux->rightChild = root;
+  return aux;
 }
 
 tNode* leftRotation(tNode* node) {
-  node->parent->rightChild = node->leftChild;
-  node->leftChild->parent = node->parent;
-  node->leftChild = node->parent;
-  node->parent = node->leftChild->parent;
-  node->leftChild->parent = node;
-  return node;
+  tNode* aux = root->rightChild;
+  root->rightChild = aux->leftChild;
+  aux->leftChild = root;
+  return aux;
 }
 
 tNode* splay(tNode* root, int key) {
@@ -39,23 +34,23 @@ tNode* splay(tNode* root, int key) {
         return root;
       } else if (root->rightChild->key < key) {
         root->rightChild->rightChild = splay(root->rightChild->rightChild, key);
-        root->rightChild = leftRotation(root->rightChild->rightChild);
+        root->rightChild = leftRotation(root->rightChild);
       } else if (root->rightChild->key > key) {
         root->rightChild->leftChild = splay(root->rightChild->leftChild, key);
-        root->rightChild = rightRotation(root->rightChild->leftChild);
+        root->rightChild = rightRotation(root->rightChild);
       }
-      return leftRotation(root->rightChild);
+      return leftRotation(root);
   } else {
     if (root->leftChild == NULL) {
       return root;
     } else if (root->leftChild->key > key) {
         root->leftChild->leftChild = splay(root->leftChild->leftChild, key);
-        root->leftChild = rightRotation(root->leftChild->leftChild);
+        root->leftChild = rightRotation(root->leftChild);
     } else if (root->leftChild->key < key) {
         root->leftChild->rightChild = splay(root->leftChild->rightChild, key);
-        root->leftChild = leftRotation(root->leftChild->rightChild);
+        root->leftChild = leftRotation(root->leftChild);
     }
-    return rightRotation(root->leftChild);
+    return rightRotation(root);
   }
 }
 
@@ -65,33 +60,20 @@ tNode* insert(tNode* root, int key, char* morse) {
     aux = (tNode*)malloc(sizeof(tNode));
     aux->morseCode = morse;
     aux->ascii = key;
-    aux->parent = NULL;
     aux->leftChild = NULL;
     aux->rightChild = NULL;
+    return aux;
   } else {
-    root = splay(root, key);
-    if (root->key == key) {
-      return root;
-    } else {
-      aux = (tNode*)malloc(sizeof(tNode));
-      aux->morseCode = morse;
-      aux->ascii = key;
-      aux->parent = NULL;
-      if (root->key < key) {
-        aux->leftChild = root;
-        aux->leftChild->parent = aux;
-        aux->rightChild = root->rightChild;
-        aux->rightChild->parent = aux;
-        root->rightChild = NULL;
+    aux = root;
+    while (aux != NULL) {
+      if (aux->ascii > key) {
+        aux = aux->leftChild;
       } else {
-        aux->rightChild = root;
-        aux->rightChild->parent = aux;
-        aux->leftChild = root->leftChild;
-        aux->leftChild->parent = aux;
-        root->leftChild = NULL;
+        aux = aux->rightChild;
       }
     }
+    aux = insert(aux, key, morse);
+    return splay(root, key);
   }
-  return aux;
 }
 

@@ -2,7 +2,6 @@ typedef struct treeNode tNode;
 struct treeNode {
   char* morseCode
   int ascii;
-  tNode* parent;
   tNode* leftChild;
   tNode* rightChild;
 }
