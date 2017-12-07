@@ -92,7 +92,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 				escolhida.
 			*/
 			newTree = insert(newTree, ascii, string_alloc);	
-			if(debug_flag) save_tree_state(newTree, ascii, string_alloc);
+			if(debug_flag) save_tree_state_2(newTree, ascii, string_alloc);
 		}	
 		fclose(table);
 		return newTree;

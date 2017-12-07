@@ -64,9 +64,9 @@ void print_t(tNode *tree, const char* filename, int ascii, const char* morse)
 	char s[I_MAX][J_MAX];
 	int i;
 	for (i = 0; i < I_MAX; i++)
-		sprintf(s[i], "%80s", " ");
+		sprintf(s[i], "%80s", "=");
 
-	_print_t(tree, 1, 0, 0, s);
+	_print_t(tree, 0, 0, 0, s);
 	db_file = fopen(filename, "a");
 	
 	fprintf(db_file, "Inserindo ASCII: %d | Morse: %s\n", ascii, morse);
@@ -77,6 +77,27 @@ void print_t(tNode *tree, const char* filename, int ascii, const char* morse)
 	fclose(db_file);
 }
 
+void Desenha(tNode *a , int nivel, FILE* fp){
+    int x;
+    if (a !=NULL)  {
+        for(x=1; x<=nivel; x++)
+            fprintf(fp, "=");
+
+    fprintf(fp, "(%2d)\n", a->ascii);
+    if (a->left != NULL) Desenha(a->left, (nivel+1), fp);
+    if (a->right != NULL) Desenha(a->right, (nivel+1), fp);
+    }
+}
+
 void save_tree_state(tNode* root, int ascii, const char* morse){
 	print_t(root, "debug.txt", ascii, morse);
+}
+
+void save_tree_state_2(tNode* root, int ascii, const char* morse){
+    FILE* db_file = fopen("debug.txt", "a");
+    fprintf(db_file, "Inserindo ASCII %d com Morse %s.\n", ascii, morse);
+    fprintf(db_file, "========================================================================================\n");
+    Desenha(root, 1, db_file);
+    fprintf(db_file, "\n");
+    fclose(db_file);
 }
