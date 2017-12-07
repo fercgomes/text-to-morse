@@ -17,6 +17,7 @@
 #include <time.h>
 
 #include "bst.h"
+#include "draw.c"
 
 #define BUFFERSIZE 256
 #define MORSEMAX 10
@@ -24,6 +25,8 @@
 /* Para escolha de implementacao */
 #define ABP 0 
 #define AVL 1
+
+static int debug_flag = 0;
 
 /* Converte caracteres para maiusculo */
 int generateUpperAscii(int code){
@@ -89,6 +92,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 				escolhida.
 			*/
 			newTree = insert(newTree, ascii, string_alloc);	
+			if(debug_flag) save_tree_state_2(newTree, ascii, string_alloc);
 		}	
 		fclose(table);
 		return newTree;
@@ -145,7 +149,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 						/* TODO: FUNCAO ASCII */
 						char_ascii = generateUpperAscii(word[i]);
-						printf("Convertendo de %d(%c) para %d(%c).\n", word[i], word[i], char_ascii, char_ascii);
+						//printf("Convertendo de %d(%c) para %d(%c).\n", word[i], word[i], char_ascii, char_ascii);
 
 						/* Busca o ponteiro para a string que contem o codigo Morse
 						   para a letra informada */
@@ -189,6 +193,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 int main(int argc, char *argv[]){
 	setlocale(LC_ALL,""); 
+	debug_flag = 1;
 	if(argc != 4){
 		fprintf(stderr, "* Numero incorreto de argumentos.\nUSO: <programa> tabelamorse.txt entrada.txt saida.txt\n");
 		return 1;
