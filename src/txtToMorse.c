@@ -17,6 +17,7 @@
 #include <time.h>
 
 #include "bst.h"
+#include "splay.h"
 
 #define BUFFERSIZE 256
 #define MORSEMAX 10
@@ -46,7 +47,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 	
 	/* Se implementacao eh ABP, seta funcao que insere */
 	if(implem_flag == ABP) insert = &BST_insert;
-	else insert = &BST_insert;
+	else insert = &SPLAY_insert;
 
 	/* Inicializa a arvore */
 	tNode* newTree = BST_create();
