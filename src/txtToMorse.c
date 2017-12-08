@@ -122,7 +122,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 	char *word,
          line[BUFFERSIZE],
 	     *morse_found,
-	     delimiters[] = {" 0123456789,.&*%\?!;/-'@\"$#=><()][}{:\r\n\t"};
+	     delimiters[] = {" "};
 
 	/* Decidir qual implementacao */
 	tNode* morseTable = tree_constructor("TabelaMorse.txt", implem_flag);
