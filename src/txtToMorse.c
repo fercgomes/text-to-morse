@@ -15,16 +15,23 @@
 #include <ctype.h>
 #include <locale.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "bst.h"
 #include "splay.h"
+#include "draw.c"
 
 #define BUFFERSIZE 256
 #define MORSEMAX 10
+#define FILENAMEMAX 25
+
+//#define SUPER_CMD
 
 /* Para escolha de implementacao */
 #define ABP 0 
-#define AVL 1
+#define SPLAY 1
+
+static int debug_flag = 0;
 
 /* Converte caracteres para maiusculo */
 int generateUpperAscii(int code){
@@ -90,6 +97,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 				escolhida.
 			*/
 			newTree = insert(newTree, ascii, string_alloc);	
+			if(debug_flag) save_tree_state_2(newTree, ascii, string_alloc);
 		}	
 		fclose(table);
 		return newTree;
@@ -123,7 +131,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 	/* Abre arquivo com texto a ser traduzido */
 	input_stream = fopen(input_file, "r");
 	if (input_stream == NULL){
-		fprintf(stderr, "Erro ao abrir o arquivo %s", input_file);
+		fprintf(stderr, "Erro ao abrir o arquivo %s.\n", input_file);
 		return 1;
 	} else {
 		/* Abre arquivo destino */	
@@ -146,7 +154,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 						/* TODO: FUNCAO ASCII */
 						char_ascii = generateUpperAscii(word[i]);
-						printf("Convertendo de %d(%c) para %d(%c).\n", word[i], word[i], char_ascii, char_ascii);
+						//printf("Convertendo de %d(%c) para %d(%c).\n", word[i], word[i], char_ascii, char_ascii);
 
 						/* Busca o ponteiro para a string que contem o codigo Morse
 						   para a letra informada */
@@ -170,15 +178,14 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 			printf(">> Arquivo %s gerado com sucesso.\n", output_file);
 			printf("+--------------------------------------------------------------------------------+\n");
 			printf("* Implementacao utilizada:\t\t\t");
-			if(implem_flag) printf("AVL\n");
+			if(implem_flag) printf("SPLAY\n");
 			else printf("ABP\n");
-			printf("* Teste para AVL:\t\t\t\t");
-			if(isAVL(morseTable)) printf("TRUE\n");
-			else printf("FALSE\n");
-			printf("* Altura da arvore utilizada:\t\t\t%d\n", BST_height(morseTable));
+						printf("* Altura da arvore utilizada:\t\t\t%d\n", BST_height(morseTable));
 			printf("* Comparacoes realizadas em consultas:\t\t%d\n", search_count);
 			printf("* Caracteres convertidos para Morse:\t\t%d\n", char_count);
 			printf("* Tempo gasto no processamento:\t\t\t%ld ms\n", elapsed);
+			if(debug_flag) printf("DEBUGGER ativado. Operacoes na arvore salvas em debug.txt\n");
+			else printf("DEBBUGER desativado.\n");
 			printf("+--------------------------------------------------------------------------------+\n");
 		}
 	}
@@ -190,8 +197,69 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 int main(int argc, char *argv[]){
 	setlocale(LC_ALL,""); 
+
+	#ifdef SUPER_CMD
+	const char  *table_file = NULL,
+				*input_file = NULL,
+				*output_file = NULL;
+	#endif
+
+	/* Padrao: ABP */
+	int implem = ABP;
+
+	#ifdef SUPER_CMD
+	/* TODO: Melhor esse algoritmo nos casos de erro */
+	int c;
+	while ((c = getopt(argc, argv, "t:i:o:ds")) != -1)
+		switch (c)
+		{
+		case 't':
+			table_file = optarg;
+			break;
+		case 'i':
+			input_file = optarg;
+			break;
+		case 'o':
+			output_file = optarg;
+			break;
+		case 'd':
+			debug_flag = 1;
+			break;
+		case 's':
+			// Implementacao de SPLAY
+			implem = SPLAY;
+			break;
+		/*case '?':
+			if (optopt == 't')
+			fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+			else if (isprint (optopt))
+			fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+			else
+			fprintf (stderr,
+					"Unknown option character `\\x%x'.\n",
+					optopt);
+			return 1;*/
+		//default:
+			//abort ();
+		}
+		
+		if(table_file && input_file && output_file){
+			return txtToMorse(table_file, input_file, output_file, implem);
+		}
+		else{
+			printf("* Arquivos obrigatorios nao especificados: ");
+			if(!table_file) printf(" Tabela Morse ");
+			if(!input_file) printf(" Arquivo de entrada ");
+			if(!output_file) printf(" Arquivo de saida ");
+			printf("\n");
+			printf("* Uso correto:\n<programa> -t tabelamorse.txt -i entrada.txt -o saida.txt\n* Flags opcionais:\n* -s: Implementacao com arvore Splay (Default: ABP)\n* -d: Salva as operacoes em arvore em um arquivo de texto (Default: off)\n");	// Mudar para stderr
+		}
+
+	#else
+	/* Caso o codigo de cima nao seja aceito! */
 	if(argc != 4){
 		fprintf(stderr, "* Numero incorreto de argumentos.\nUSO: <programa> tabelamorse.txt entrada.txt saida.txt\n");
 		return 1;
-	} else return txtToMorse(argv[1], argv[2], argv[3], ABP);
+	} else return txtToMorse(argv[1], argv[2], argv[3], implem);
+	#endif
 }
