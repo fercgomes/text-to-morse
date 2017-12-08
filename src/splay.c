@@ -46,25 +46,7 @@ tNode* splay(tNode* root, int key) {
 }
 
 tNode* SPLAY_insert(tNode* root, int key, char* morse) {
-  tNode* aux;
-  if (root == NULL) {
-    aux = (tNode*)malloc(sizeof(tNode));
-    aux->morseCode = morse;
-    aux->ascii = key;
-    aux->left = NULL;
-    aux->right = NULL;
-    return aux;
-  } else {
-    aux = root;
-    while (aux != NULL) {
-      if (aux->ascii > key) {
-        aux = aux->left;
-      } else {
-        aux = aux->right;
-      }
-    }
-    aux = SPLAY_insert(aux, key, morse);
-    return splay(root, key);
-  }
+  root = BST_insert(root, key, morse);
+  return splay(root, key);
 }
 
