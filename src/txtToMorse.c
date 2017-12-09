@@ -97,7 +97,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 				escolhida.
 			*/
 			newTree = insert(newTree, ascii, string_alloc);	
-			if(debug_flag) save_tree_state_2(newTree, ascii, string_alloc);
+			if(debug_flag) save_tree_state_2(newTree, ascii, string_alloc, 0);
 		}	
 		fclose(table);
 		return newTree;
@@ -115,8 +115,11 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 	FILE *input_stream, *output_stream;
 
-	/* Ponteiro para funcao de consulta */
-	tNode* (*insert) (tNode*, int, int*);
+	/* Ponteiro para funcao de insercao */
+	tNode* (*insert) (tNode*, int, char*);
+
+  /* Ponteiro para funcao de consulta */
+  char* (*search) (tNode*, int, int*);
 	
 	int i, char_ascii;
 	/* Contadores de comparacoes e caracteres convertidos */
@@ -130,8 +133,12 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 	tNode* morseTable = tree_constructor("TabelaMorse.txt", implem_flag);
 
 	/* TODO: alterar para funcao de insercao da SPLAY */
-	if(implem_flag == SPLAY) insert = &BST_insert;
+	if(implem_flag == SPLAY) insert = &SPLAY_insert;
 	else insert = &BST_insert;
+
+  if(implem_flag == SPLAY) search = &SPLAY_search;
+  else search = &BST_search;
+
 	
 	/* Abre arquivo com texto a ser traduzido */
 	input_stream = fopen(input_file, "r");
@@ -163,7 +170,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 						/* Busca o ponteiro para a string que contem o codigo Morse
 						   para a letra informada */
-						morse_found = BST_search(morseTable, char_ascii, &search_count);
+						morse_found = search(morseTable, char_ascii, &search_count);
 						if(morse_found){
 							char_count++;
 							fprintf(output_stream, "%s ", morse_found);

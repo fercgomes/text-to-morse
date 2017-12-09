@@ -12,4 +12,4 @@ tNode* splay(tNode* root, int key, int* search_count);
 
 tNode* SPLAY_insert(tNode* root, int key, char* morse);
 
-char* SPLAY_search(tNode* root, int, key, int* search_count);
+char* SPLAY_search(tNode* root, int key, int* search_count);
