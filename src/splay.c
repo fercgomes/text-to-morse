@@ -50,3 +50,5 @@ tNode* SPLAY_insert(tNode* root, int key, char* morse) {
   return splay(root, key);
 }
 
+/* TODO: IMPLEMENTAR CONSULTA SPLAY */
+

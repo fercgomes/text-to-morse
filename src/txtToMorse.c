@@ -25,7 +25,7 @@
 #define MORSEMAX 10
 #define FILENAMEMAX 25
 
-//#define SUPER_CMD
+#define SUPER_CMD
 
 /* Para escolha de implementacao */
 #define ABP 0 
@@ -50,7 +50,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 	size_t morse_size;
 	
 	/* Ponteiro para funcao que insere elementos na arvore */
-	tNode* (*insert) (tNode*, int, char*);
+    tNode* (*insert) (tNode*, int, char*);
 	
 	/* Se implementacao eh ABP, seta funcao que insere */
 	if(implem_flag == ABP) insert = &BST_insert;
@@ -115,6 +115,8 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 	FILE *input_stream, *output_stream;
 
+	/* Ponteiro para funcao de consulta */
+	tNode* (*insert) (tNode*, int, int*);
 	
 	int i, char_ascii;
 	/* Contadores de comparacoes e caracteres convertidos */
@@ -125,8 +127,11 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 	     *morse_found,
 	     delimiters[] = {" "};
 
-	/* Decidir qual implementacao */
 	tNode* morseTable = tree_constructor("TabelaMorse.txt", implem_flag);
+
+	/* TODO: alterar para funcao de insercao da SPLAY */
+	if(implem_flag == SPLAY) insert = &BST_insert;
+	else insert = &BST_insert;
 	
 	/* Abre arquivo com texto a ser traduzido */
 	input_stream = fopen(input_file, "r");
