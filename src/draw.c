@@ -93,9 +93,11 @@ void save_tree_state(tNode* root, int ascii, const char* morse){
 	print_t(root, "debug.txt", ascii, morse);
 }
 
-void save_tree_state_2(tNode* root, int ascii, const char* morse){
+void save_tree_state_2(tNode* root, int ascii, const char* morse, int operation){
+	/* 0 - Insertion, 1 - Splay */
     FILE* db_file = fopen("debug.txt", "a");
-    fprintf(db_file, "Inserindo ASCII %d com Morse %s.\n", ascii, morse);
+    if(operation == 0) fprintf(db_file, "Inserindo ASCII %d com Morse %s.\n", ascii, morse);
+	else fprintf(db_file, "Fazendo Splay no nodo ASCII %d.\n", ascii);	
     fprintf(db_file, "========================================================================================\n");
     Desenha(root, 1, db_file);
     fprintf(db_file, "\n");
