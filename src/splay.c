@@ -17,30 +17,37 @@ tNode* leftRotation(tNode* root) {
   return aux;
 }
 
-tNode* splay(tNode* root, int key) {
+tNode* splay(tNode* root, int key, int* search_count) {
   if (root == NULL || root->ascii == key) {
+    (*search_count) += 1;
     return root;
   } else if (root->ascii < key) {
-      if (root->right == NULL) {
+    if (root->right == NULL) {
+      (*search_count) -= 2;
         return root;
-      } else if (root->right->ascii < key) {
-        root->right->right = splay(root->right->right, key);
+    } else if (root->right->ascii < key) {
+        (*search_count) -= 1;
+        root->right->right = splay(root->right->right, key, search_count);
         root->right = leftRotation(root->right);
-      } else if (root->right->ascii > key) {
-        root->right->left = splay(root->right->left, key);
+    } else if (root->right->ascii > key) { 
+        root->right->left = splay(root->right->left, key, search_count);
         root->right = rightRotation(root->right);
-      }
-      return leftRotation(root);
+    }
+    (*search_count) += 5;
+    return leftRotation(root);
   } else {
     if (root->left == NULL) {
+      (*search_count) -= 2;
       return root;
     } else if (root->left->ascii > key) {
-        root->left->left = splay(root->left->left, key);
+        (*search_count) -= 1;
+        root->left->left = splay(root->left->left, key, search_count);
         root->left = rightRotation(root->left);
     } else if (root->left->ascii < key) {
-        root->left->right = splay(root->left->right, key);
+        root->left->right = splay(root->left->right, key, search_count);
         root->left = leftRotation(root->left);
     }
+    (*search_count) -= 5;
     return rightRotation(root);
   }
 }
@@ -50,5 +57,11 @@ tNode* SPLAY_insert(tNode* root, int key, char* morse) {
   return splay(root, key);
 }
 
-/* TODO: IMPLEMENTAR CONSULTA SPLAY */
-
+char* SPLAY_search(tNode* root, int key, int* search_count) {
+  root = splay(root, key, search_count);
+  (*search_count)++;
+  if (root->ascii == key) {
+    return root->morseCode;
+  } else { 
+    return NULL;
+}
