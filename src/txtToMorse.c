@@ -171,6 +171,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 						/* Busca o ponteiro para a string que contem o codigo Morse
 						   para a letra informada */
 						morse_found = search(morseTable, char_ascii, &search_count);
+                        if(debug_flag) save_tree_state_2(morseTable, char_ascii, morse_found, 1);
 						if(morse_found){
 							char_count++;
 							fprintf(output_stream, "%s ", morse_found);
