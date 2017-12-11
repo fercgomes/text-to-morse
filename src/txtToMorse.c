@@ -13,6 +13,7 @@
 #include <string.h>
 #include <locale.h>
 #include <ctype.h>
+#include <wctype.h>
 #include <locale.h>
 #include <time.h>
 #include <unistd.h>
@@ -32,13 +33,6 @@
 #define SPLAY 1
 
 static int debug_flag = 0;
-
-/* Converte caracteres para maiusculo */
-int generateUpperAscii(int code){
-	/* Converte a - z para A - Z */
-	if(code >= 97 && code <= 122) return toupper(code);
-	else return code;
-}
 
 /* Constroi uma ABP ou AVL com a tabela Morse */
 tNode* tree_constructor(const char* filename, int implem_flag){
@@ -104,6 +98,24 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 	}
 }
 
+/* Converter caracters acentuados para equivalentes sem acentos.
+   Retorna todos maiusculos. */
+char wchar_to_char(wchar_t character) {
+    const wchar_t* origin =    L"ÁÀÃÂÄÉÈÊËÍÌÎĨÏÓÒÔÕÖÚÙÛŨÜÇÑ";
+    const char* target =           "AAAAAEEEEIIIIIOOOOOUUUUUCN";
+    int i = 0;
+    
+    character = towupper(character);
+
+    while( origin[i] != 0 && character != origin[i] )
+        i++;
+
+    if( origin[i] != 0 )
+        character = target[i];
+
+    return character;
+} 
+
 /* Converte um arquivo de texto para codigo Morse.
    USO: txtToMorse(|tabela_morse.txt|, |arquivo_de_entrada.txt|, |arquivo_de_saida.txt|, implem_flag)
 	implem_flag: ABP (Implementacao em ABP) [0]
@@ -115,26 +127,19 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
 	FILE *input_stream, *output_stream;
 
-	/* Ponteiro para funcao de insercao */
-	tNode* (*insert) (tNode*, int, char*);
+	int i, white_space_flag = 0;
 
-
-	int i, char_ascii;
 	/* Contadores de comparacoes e caracteres convertidos */
 	int search_count = 0, char_count = 0;
 
-	char *word,
-         line[BUFFERSIZE],
-	     *morse_found,
-	     delimiters[] = {" "};
+	char normalized_char,
+	     *morse_found;
 
+    wchar_t input_character;
+
+    /* Constroi a arvore binaria de pesquisa a partir do arquivo de texto com a tabela Morse */
 	tNode* morseTable = tree_constructor("TabelaMorse.txt", implem_flag);
 
-	/* TODO: alterar para funcao de insercao da SPLAY */
-	if(implem_flag == SPLAY) insert = &SPLAY_insert;
-	else insert = &BST_insert;
-
-	
 	/* Abre arquivo com texto a ser traduzido */
 	input_stream = fopen(input_file, "r");
 	if (input_stream == NULL){
@@ -150,54 +155,60 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 		} else {
 			/* Inicia leitura do arquivo */ 
 			start = clock();
-			/* Busca linha de texto */
-			while(fgets(line, BUFFERSIZE, input_stream)){
-				/* Busca palavra */
-				word = strtok(line, delimiters);
-				while(word != NULL){
-					/* Recebe palavra */
-					/* Percorre cada letra da palavra e imprime no arquivo o codigo Morse */
-					for(i = 0; word[i] != '\0'; i++){
 
-						/* TODO: FUNCAO ASCII */
-						char_ascii = generateUpperAscii(word[i]);
-						//printf("Convertendo de %d(%c) para %d(%c).\n", word[i], word[i], char_ascii, char_ascii);
+            while(fscanf(input_stream, "%lc", &input_character) == 1){
+                /* Recebe um long char do stream de entrada */
+                if(input_character == ' '){
+                    /* Espaco em branco delimita a palavra */
+                    if(!white_space_flag)
+                        fprintf(output_stream, "/ ");
+                    /* Liga a flag que sinaliza que o ultimo caracter era um espaco em branco */
+                    white_space_flag = 1;
+                } else {
+                    /* Converte caracteres acentuados para todos maiusculos */
+                    normalized_char = wchar_to_char(input_character);
 
-						/* Busca o ponteiro para a string que contem o codigo Morse
-						   para a letra informada */
-            if (implem_flag == SPLAY) morse_found = SPLAY_search(&morseTable, char_ascii, &search_count);
-            else morse_found = BST_search(morseTable, char_ascii, &search_count);
-                        if(debug_flag) save_tree_state_2(morseTable, char_ascii, morse_found, 1);
-						if(morse_found){
-							char_count++;
-							fprintf(output_stream, "%s ", morse_found);
-						}
+                    /* INSERE NA ARVORE */ 
+                    /* Busca o ponteiro para a string que contem o codigo Morse
+                       para a letra informada */
+                    if (implem_flag == SPLAY)
+                        morse_found = SPLAY_search(&morseTable, normalized_char, &search_count);
+                    else
+                        morse_found = BST_search(morseTable, normalized_char, &search_count);
+
+                    /* Salva o estado da arvore apos a insercao, caso a flag de debug estiver ligada */        
+                    if(debug_flag)
+                        save_tree_state_2(morseTable, normalized_char, morse_found, 1);
+
+                    /* Se encontrou um codigo Morse, salva no arquivo */
+					if(morse_found){
+						char_count++;
+						fprintf(output_stream, "%s ", morse_found);
 					}
-					/* Insere delimitador de palavra */
-					fprintf(output_stream, "/ ");
-					/* Gera nova palavra */
-					word = strtok(NULL, delimiters);
-				}
-			}
-			end = clock();
-			elapsed = 1000 * (end - start) / (CLOCKS_PER_SEC);
-			/* Imprimir comparacoes */
-			printf("+--------------------------------------------------------------------------------+\n");
-			printf(">> Convertendo %s...\n", input_file);
-			printf(">> Arquivo %s gerado com sucesso.\n", output_file);
-			printf("+--------------------------------------------------------------------------------+\n");
-			printf("* Implementacao utilizada:\t\t\t");
-			if(implem_flag) printf("SPLAY\n");
-			else printf("ABP\n");
-						printf("* Altura da arvore utilizada:\t\t\t%d\n", BST_height(morseTable));
-			printf("* Comparacoes realizadas em consultas:\t\t%d\n", search_count);
-			printf("* Caracteres convertidos para Morse:\t\t%d\n", char_count);
-			printf("* Tempo gasto no processamento:\t\t\t%ld ms\n", elapsed);
-			if(debug_flag) printf("DEBUGGER ativado. Operacoes na arvore salvas em debug.txt\n");
-			else printf("DEBBUGER desativado.\n");
-			printf("+--------------------------------------------------------------------------------+\n");
+
+                    /* Reseta flag de espaco em branco */
+                    white_space_flag = 0;
+                }
+            }
 		}
-	}
+        end = clock();
+        elapsed = 1000 * (end - start) / (CLOCKS_PER_SEC);
+        /* Imprimir comparacoes */
+        printf("+--------------------------------------------------------------------------------+\n");
+        printf(">> Convertendo %s...\n", input_file);
+        printf(">> Arquivo %s gerado com sucesso.\n", output_file);
+        printf("+--------------------------------------------------------------------------------+\n");
+        printf("* Implementacao utilizada:\t\t\t");
+        if(implem_flag) printf("SPLAY\n");
+        else printf("ABP\n");
+                    printf("* Altura da arvore utilizada:\t\t\t%d\n", BST_height(morseTable));
+        printf("* Comparacoes realizadas em consultas:\t\t%d\n", search_count);
+        printf("* Caracteres convertidos para Morse:\t\t%d\n", char_count);
+        printf("* Tempo gasto no processamento:\t\t\t%ld ms\n", elapsed);
+        if(debug_flag) printf("DEBUGGER ativado. Operacoes na arvore salvas em debug.txt\n");
+        else printf("DEBBUGER desativado.\n");
+        printf("+--------------------------------------------------------------------------------+\n");
+    }
 	BST_delete(morseTable);
 	fclose(input_stream);
 	fclose(output_stream);
