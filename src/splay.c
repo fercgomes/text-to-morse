@@ -73,12 +73,12 @@ tNode* SPLAY_insert(tNode* root, int key, char* morse) {
   return root;
 }
 
-char* SPLAY_search(tNode* root, int key, int* search_count) {
-  root = splay(root, key, search_count);
+char* SPLAY_search(tNode** root, int key, int* search_count) {
+  *root = splay((*root), key, search_count);
   (*search_count)++;
-  if (root == NULL) {
+  if ((*root)->ascii != key) {
     return NULL;
   } else { 
-    return root->morseCode;
+    return (*root)->morseCode;
   }
 }
