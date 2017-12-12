@@ -17,54 +17,68 @@ tNode* leftRotation(tNode* root) {
   return aux;
 }
 
-tNode* splay(tNode* root, int key) {
-  if (root == NULL || root->ascii == key) {
+tNode* splay(tNode* root, int key, int* search_count) {
+  if (root == NULL) {
+   return NULL;
+  } else if (root->ascii == key) {
+    (*search_count) += 1;
     return root;
-  } else if (root->ascii < key) {
-      if (root->right == NULL) {
+  } else if (root->ascii < key) { // Zag
+    if (root->right == NULL) {
+      (*search_count) += 2;
         return root;
-      } else if (root->right->ascii < key) {
-        root->right->right = splay(root->right->right, key);
-        root->right = leftRotation(root->right);
-      } else if (root->right->ascii > key) {
-        root->right->left = splay(root->right->left, key);
-        root->right = rightRotation(root->right);
-      }
-      return leftRotation(root);
-  } else {
-    if (root->left == NULL) {
-      return root;
-    } else if (root->left->ascii > key) {
-        root->left->left = splay(root->left->left, key);
-        root->left = rightRotation(root->left);
-    } else if (root->left->ascii < key) {
-        root->left->right = splay(root->left->right, key);
-        root->left = leftRotation(root->left);
+    } else if (root->right->ascii < key) { // Zag-zag
+        (*search_count) -= 1;
+        root->right->right = splay(root->right->right, key, search_count);
+        root = leftRotation(root);
+    } else if (root->right->ascii > key) {  // Zag-zig
+        root->right->left = splay(root->right->left, key, search_count);
+         if (root->right->left != NULL) {
+           root->right = rightRotation(root->right);
+         }
     }
-    return rightRotation(root);
+    (*search_count) += 4;
+    if (root->right != NULL) {
+      root = leftRotation(root);
+    }
+    return root;
+
+  } else { // Zig
+    if (root->left == NULL) {
+      (*search_count) += 2;
+      return root;
+    } else if (root->left->ascii > key) { //Zig-zig
+        (*search_count) -= 1;
+        root->left->left = splay(root->left->left, key, search_count);
+        root = rightRotation(root);
+    } else if (root->left->ascii < key) { //Zig-zag
+        root->left->right = splay(root->left->right, key, search_count);
+        if (root->left->right != NULL) {
+          root->left = leftRotation(root->left);
+        }
+    }
+    (*search_count) += 4;
+    if (root->left != NULL) {
+      root = rightRotation(root);
+    }
+    return root;
+
   }
 }
 
 tNode* SPLAY_insert(tNode* root, int key, char* morse) {
-  tNode* aux;
-  if (root == NULL) {
-    aux = (tNode*)malloc(sizeof(tNode));
-    aux->morseCode = morse;
-    aux->ascii = key;
-    aux->left = NULL;
-    aux->right = NULL;
-    return aux;
-  } else {
-    aux = root;
-    while (aux != NULL) {
-      if (aux->ascii > key) {
-        aux = aux->left;
-      } else {
-        aux = aux->right;
-      }
-    }
-    aux = SPLAY_insert(aux, key, morse);
-    return splay(root, key);
-  }
+  int counter = 0;
+  root = BST_insert(root, key, morse);
+  root = splay(root, key, &counter);
+  return root;
 }
 
+char* SPLAY_search(tNode** root, int key, int* search_count) {
+  *root = splay((*root), key, search_count);
+  (*search_count)++;
+  if ((*root)->ascii != key) {
+    return NULL;
+  } else { 
+    return (*root)->morseCode;
+  }
+}

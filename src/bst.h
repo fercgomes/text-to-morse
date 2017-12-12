@@ -16,8 +16,4 @@ char* BST_search(tNode* root, int key, int* search_count);
 
 int BST_height(tNode *a);
 
-int BST_factor(tNode *a);
-
-int isAVL(tNode* root);
-
 tNode* BST_insert(tNode* root, int ascii, char* morseCode);
