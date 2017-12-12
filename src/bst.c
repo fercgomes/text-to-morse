@@ -51,10 +51,6 @@ int BST_height(tNode *a){
 	}
 }
 
-int BST_factor(tNode *a){
-	return(BST_height(a->left) - BST_height(a->right));
-}
-
 /* Insere um nodo em uma ABP, segundo os criterios de uma ABP */
 tNode* BST_insert(tNode* root, int ascii, char* morseCode){
 	tNode* new;
