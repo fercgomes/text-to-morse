@@ -133,7 +133,7 @@ void data_to_csv(clock_t elapsed, int implem_flag, const char* filename, int cha
 	implem_flag: ABP (Implementacao em ABP) [0]
 		     AVL (Implementacao em AVL)	[1]
    Retorna 1 em caso de erro e 0 em caso de sucesso . */
-int txtToMorse(const char* morsetable, const char* input_file, const char* output_file, int implem_flag, int print_flag){
+int txtToMorse(const char* morsetable, const char* input_file, const char* output_file, int implem_flag){
 	/* Contagem de tempo */
 	clock_t start, end, elapsed;
 
@@ -242,7 +242,6 @@ int main(int argc, char *argv[]){
 
 	/* Padrao: ABP */
 	int implem = ABP;
-
 	#ifdef SUPER_CMD
 	/* TODO: Melhor esse algoritmo nos casos de erro */
 	int c;
@@ -283,7 +282,7 @@ int main(int argc, char *argv[]){
 		}
 		
 		if(table_file && input_file && output_file){
-			return txtToMorse(table_file, input_file, output_file, implem, print_flag);
+			return txtToMorse(table_file, input_file, output_file, implem);
 		}
 		else{
 			printf("* Arquivos obrigatorios nao especificados: ");
