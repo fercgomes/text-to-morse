@@ -114,7 +114,19 @@ char wchar_to_char(wchar_t character) {
         character = target[i];
 
     return character;
-} 
+}
+
+void data_to_csv(clock_t elapsed, int implem_flag, const char* filename, int char_count, int search_count, int height) {
+  FILE *csv_stream;
+  csv_stream = fopen("data.csv", "a");
+  if (csv_stream == NULL) {
+    printf("Erro abrindo csv");
+  } else {
+    fprintf(csv_stream, "%s, %i, %i, %i, %i, %i\n", filename, implem_flag, elapsed, char_count, search_count, height);
+  }
+  fclose(csv_stream);
+  return;
+}
 
 /* Converte um arquivo de texto para codigo Morse.
    USO: txtToMorse(|tabela_morse.txt|, |arquivo_de_entrada.txt|, |arquivo_de_saida.txt|, implem_flag)
@@ -194,6 +206,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
         end = clock();
         elapsed = 1000 * (end - start) / (CLOCKS_PER_SEC);
         /* Imprimir comparacoes */
+        data_to_csv(elapsed, implem_flag, input_file, search_count, char_count, BST_height(morseTable));
         printf("+--------------------------------------------------------------------------------+\n");
         printf(">> Convertendo %s...\n", input_file);
         printf(">> Arquivo %s gerado com sucesso.\n", output_file);
