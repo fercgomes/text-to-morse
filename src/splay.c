@@ -3,9 +3,6 @@
 #include "bst.h"
 #include "splay.h"
 
-/* TODO: @DANIEL
- * Documentar essa parte um pouco melhor */
-
 tNode* rightRotation(tNode* root) {
   tNode* aux = root->left;
   root->left = aux->right;
@@ -21,20 +18,20 @@ tNode* leftRotation(tNode* root) {
 }
 
 tNode* splay(tNode* root, int key, int* search_count) {
-  if (root == NULL) {
+  if (root == NULL) { // Check if tree is empty
    return NULL;
-  } else if (root->ascii == key) {
+  } else if (root->ascii == key) { // Check if the key the algorithm is looking for, is the root tree
     (*search_count) += 1;
     return root;
-  } else if (root->ascii < key) { // Zag
-    if (root->right == NULL) {
+  } else if (root->ascii < key) { //If the key is bigger than the key of the root, ZAG!
+    if (root->right == NULL) { // If the right key doesn't exist, returns the root and concludes the key isn't presented in the tree
       (*search_count) += 2;
         return root;
-    } else if (root->right->ascii < key) { // Zag-zag
+    } else if (root->right->ascii < key) { // If the key is on the right tree of the right tree, ZAG-ZAG
         (*search_count) -= 1;
         root->right->right = splay(root->right->right, key, search_count);
         root = leftRotation(root);
-    } else if (root->right->ascii > key) {  // Zag-zig
+    } else if (root->right->ascii > key) {  // If the key is on the left tree of the right tree, ZAG-ZIG
         root->right->left = splay(root->right->left, key, search_count);
          if (root->right->left != NULL) {
            root->right = rightRotation(root->right);
@@ -46,15 +43,15 @@ tNode* splay(tNode* root, int key, int* search_count) {
     }
     return root;
 
-  } else { // Zig
-    if (root->left == NULL) {
+  } else { // Key is on the left tree
+    if (root->left == NULL) { // If left tree doesn't exist, then key isn't on the tree
       (*search_count) += 2;
       return root;
-    } else if (root->left->ascii > key) { //Zig-zig
+    } else if (root->left->ascii > key) { // If the key is on the left tree of the left tree, ZIG-ZIG
         (*search_count) -= 1;
         root->left->left = splay(root->left->left, key, search_count);
         root = rightRotation(root);
-    } else if (root->left->ascii < key) { //Zig-zag
+    } else if (root->left->ascii < key) { // If the key is on the right tree of the left tree, ZIG-ZAG
         root->left->right = splay(root->left->right, key, search_count);
         if (root->left->right != NULL) {
           root->left = leftRotation(root->left);
@@ -71,6 +68,7 @@ tNode* splay(tNode* root, int key, int* search_count) {
 
 tNode* SPLAY_insert(tNode* root, int key, char* morse) {
   int counter = 0;
+  /* A splay insertion is just a bst insertion with a splay after it */
   root = BST_insert(root, key, morse);
   root = splay(root, key, &counter);
   return root;
