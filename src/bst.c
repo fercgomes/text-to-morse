@@ -21,7 +21,7 @@ tNode* BST_delete(tNode* root){
 	return NULL;
 }
 
-/* Retorna a string que contem o codigo Morse, caso encontrar. Retorna NULL se nao encontrar. */
+/* Retorna um ponteiro para a string que contem o codigo Morse, caso encontrar. Retorna NULL se nao encontrar. */
 char* BST_search(tNode* root, int key, int* search_count){
 	if(root){
 		if(root->ascii == key){

@@ -3,6 +3,9 @@
 #include "bst.h"
 #include "splay.h"
 
+/* TODO: @DANIEL
+ * Documentar essa parte um pouco melhor */
+
 tNode* rightRotation(tNode* root) {
   tNode* aux = root->left;
   root->left = aux->right;

@@ -25,6 +25,7 @@
 #define MORSEMAX 10
 #define BUFFERSIZE 256
 
+/* Define qual interface de linha de comando sera usada */
 #define SUPER_CMD
 
 /* Para escolha de implementacao */
@@ -34,7 +35,7 @@
 /* Flag para debugger */
 static int debug_flag = 0;
 
-/* Constroi uma ABP ou SPLAY com a tabela Morse */
+/* Constroi uma ABP ou SPLAY a partir de um arquivo de texto com a tabela Morse */
 tNode* tree_constructor(const char* filename, int implem_flag){
 	FILE* table;
 	char line[BUFFERSIZE];
@@ -82,6 +83,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 			if(!morse_size) morse_size = MORSEMAX;
 			else morse_size++;
 
+			/* A string fica alocada dinamicamente. O ponteiro eh salvo na arvore */
 			string_alloc = (char*)malloc(morse_size * sizeof(char));
 			strcpy(string_alloc, word);	
 	
@@ -91,6 +93,8 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 				escolhida.
 			*/
 			newTree = insert(newTree, ascii, string_alloc);	
+
+			/* Se debug_flag = 1, salva o estado da arvore em um arquivo de texto */
 			if(debug_flag) save_tree_state(newTree, ascii, string_alloc, 0);
 		}	
 		fclose(table);
@@ -101,19 +105,24 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 /* Converter caracters acentuados para equivalentes sem acentos.
    Retorna todos maiusculos. */
 char wchar_to_char(wchar_t character) {
-    const wchar_t* origin =    L"ÁÀÃÂÄÉÈÊËÍÌÎĨÏÓÒÔÕÖÚÙÛŨÜÇÑ";
-    const char* target =           "AAAAAEEEEIIIIIOOOOOUUUUUCN";
-    int i = 0;
-    
-    character = towupper(character);
+	/* Strings mapeadas */
+	const wchar_t* origin =    L"ÁÀÃÂÄÉÈÊËÍÌÎĨÏÓÒÔÕÖÚÙÛŨÜÇÑ";
+	const char* target =           "AAAAAEEEEIIIIIOOOOOUUUUUCN";
+	int i = 0;
 
-    while( origin[i] != 0 && character != origin[i] )
-        i++;
+	/* Todos os caracteres retornados sao maiusculos */
+	character = towupper(character);
 
-    if( origin[i] != 0 )
-        character = target[i];
+	/* Busca caracter na string de origem (com acentos) */
+	while( origin[i] != 0 && character != origin[i] )
+		i++;
 
-    return character;
+	/* Se encontrou um caracter correspondente */
+	if( origin[i] != 0 )
+		/* Busca o caracter sem acento correspondente */
+		character = target[i];
+
+	return character;
 } 
 
 /* Converte um arquivo de texto para codigo Morse.
@@ -210,12 +219,16 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 		else printf("DEBBUGER desativado.\n");
 		printf("+--------------------------------------------------------------------------------+\n");
     	}
+
+	/* Desaloca a arvore utilizada */
 	BST_delete(morseTable);
+	/* Fecha os arquivos utilizados */
 	fclose(input_stream);
 	fclose(output_stream);
 	return 0;
 }
 
+/* Mensagem de ajuda para o usuario */
 int helpMessage(){
 	printf("=================================================================================\n");
 	printf("* TEXT TO MORSE CONVERTER\n");
@@ -235,6 +248,7 @@ int helpMessage(){
 	return 0;
 }
 
+/* Programa principal */
 int main(int argc, char *argv[]){
 	setlocale(LC_ALL,""); 
 
@@ -251,29 +265,36 @@ int main(int argc, char *argv[]){
 	int c;
 	/* Busca flags da linha de comando */
 	while ((c = getopt(argc, argv, "t:i:o:dsh")) != -1)
-		switch (c)
-		{
+		switch (c){
 			case 't':
+				/* Busca nome do arquivo com a Tabela Morse */
 				table_file = optarg;
 				break;
 			case 'i':
+				/* Busca nome do arquivo de origem */
 				input_file = optarg;
 				break;
 			case 'o':
+				/* Busca nome do arquivo de destino */
 				output_file = optarg;
 				break;
 			case 'd':
+				/* Seta flag de debug */
 				debug_flag = 1;
 				break;
 			case 's':
-				// Implementacao de SPLAY
+				/* Seta implementacao para SPLAY */
 				implem = SPLAY;
 				break;
 			case 'h':
+				/* Mostra mensagem de ajuda */
 				return helpMessage();
 		}
 		
+	/* Nao foram fornecidos arguments na chamada do programa */
 	if(argc == 1) return helpMessage();
+
+	/* Se todos os argumentos obrigatorios foram fornecidos, roda o programa */
 	if(table_file && input_file && output_file)
 		return txtToMorse(table_file, input_file, output_file, implem);
 	else {
@@ -284,6 +305,7 @@ int main(int argc, char *argv[]){
 		printf("\n");
 		printf("* Uso correto:\n<programa> -t tabelamorse.txt -i entrada.txt -o saida.txt\n* Flags opcionais:\n* -s: Implementacao com arvore Splay (Default: ABP)\n* -d: Salva as operacoes em arvore em um arquivo de texto (Default: off)\n* -h: para mais informacoes\n");	// Mudar para stderr
 	}
+
 	#else
 	/* Caso o codigo de cima nao seja aceito! */
 	if(argc != 4){
