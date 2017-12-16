@@ -34,7 +34,7 @@
 
 static int debug_flag = 0, print_flag = 1;
 
-/* Constroi uma ABP ou AVL com a tabela Morse */
+/* Constroi uma ABP ou Splay com a tabela Morse */
 tNode* tree_constructor(const char* filename, int implem_flag){
 	FILE* table;
 	char line[BUFFERSIZE];
