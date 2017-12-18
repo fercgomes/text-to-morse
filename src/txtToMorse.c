@@ -91,7 +91,7 @@ tNode* tree_constructor(const char* filename, int implem_flag){
 				escolhida.
 			*/
 			newTree = insert(newTree, ascii, string_alloc);	
-			if(debug_flag) save_tree_state_2(newTree, ascii, string_alloc, 0);
+			if(debug_flag) save_tree_state(newTree, ascii, string_alloc, 0);
 		}	
 		fclose(table);
 		return newTree;
@@ -190,7 +190,7 @@ int txtToMorse(const char* morsetable, const char* input_file, const char* outpu
 
                     /* Salva o estado da arvore apos a insercao, caso a flag de debug estiver ligada */        
                     if(debug_flag)
-                        save_tree_state_2(morseTable, normalized_char, morse_found, 1);
+                        save_tree_state(morseTable, normalized_char, morse_found, 1);
 
                     /* Se encontrou um codigo Morse, salva no arquivo */
 					if(morse_found){

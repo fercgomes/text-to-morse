@@ -29,11 +29,11 @@ char* BST_search(tNode* root, int key, int* search_count){
 			return root->morseCode;
 		}
 		else if(key < root->ascii){
-			(*search_count)++;
+			(*search_count) += 2;
 			return BST_search(root->left, key, search_count);
 		}
-		else if(key > root->ascii){
-			(*search_count)++;	
+		else {
+			(*search_count) += 2;
 			BST_search(root->right, key, search_count);			
 		}
 	} else return NULL;
